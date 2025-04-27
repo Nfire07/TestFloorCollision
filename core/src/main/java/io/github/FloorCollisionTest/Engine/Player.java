@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 
 public class Player {
+    
     // fondamental variables for the player
     private final Rectangle[] playerHitboxes;
     private float x,y;
@@ -42,6 +43,7 @@ public class Player {
     private boolean isJumping = false;
     private boolean isFalling = false;
     private boolean isDashing = false; 
+    private boolean hasDashed = false;
     
     // collision related constants
     public static final int COLLIDING_TOP = 1;
@@ -64,7 +66,6 @@ public class Player {
     public static final int DEAD_ZONE = 5;
     public static final int ZOOM = 6;
     public static final int SHAKE = 7;
-
 
     public Player(Rectangle hitbox,Texture[] textures,float frameDuration) {
         this.playerHitboxes = generatePlayerHitboxes(hitbox);
@@ -256,12 +257,7 @@ public class Player {
     public Texture getCurrentFrame() {
         return this.currentFrame;
     }
-
     
-
-    
-
-
     /*
         stateTime variable holds time passed from start of animation
     */
@@ -488,6 +484,7 @@ public class Player {
         } else if (!isJumping) {
             fallSpeed = 0f;
             isFalling = false;
+            hasDashed = false; 
         }
     }
 
@@ -509,24 +506,6 @@ public class Player {
         }
     }
 
-    /*
-        player movement methods
-    */
-    public void moveLeft(float deltaTime,Rectangle leftHitbox){
-        if(leftHitbox != null && isColliding(leftHitbox, COLLIDING_LEFT)) {
-            x = leftHitbox.x + leftHitbox.width;
-        } else {
-            x -= this.movementSpeed * deltaTime;
-        }
-        updateHitbox();
-    }
-
-    public void moveRight(float deltaTime,Rectangle rightHitbox){
-        if(rightHitbox == null || !isColliding(rightHitbox, COLLIDING_RIGHT)) {
-            x += this.movementSpeed * deltaTime;
-        }
-        updateHitbox();
-    }
     /*
         camera related player methods that defines some basic camera movements
     */
@@ -610,29 +589,57 @@ public class Player {
         camera.update();
     }
 
+    /*
+        player movement methods
+    */
+    public void moveLeft(float deltaTime,Rectangle leftHitbox){
+        if(leftHitbox != null && isColliding(leftHitbox, COLLIDING_LEFT)) {
+            x = leftHitbox.x + leftHitbox.width;
+        } else {
+            x -= this.movementSpeed * deltaTime;
+        }
+        updateHitbox();
+    }
+
+    public void moveRight(float deltaTime,Rectangle rightHitbox){
+        if(rightHitbox == null || !isColliding(rightHitbox, COLLIDING_RIGHT)) {
+            x += this.movementSpeed * deltaTime;
+        }
+        updateHitbox();
+    }
+
     public void DashLeft() {
-        if (timeSinceLastDash >= dashCooldown && !isDashing) {
+        if (timeSinceLastDash >= dashCooldown && !isDashing && !hasDashed) {
             isDashing = true;
             dashTimeRemaining = dashDuration;
             dashDirection = -1;
             timeSinceLastDash = 0f;
+            hasDashed = true; 
         }
     }
     
     public void DashRight() {
-        if (timeSinceLastDash >= dashCooldown && !isDashing) {
+        if (timeSinceLastDash >= dashCooldown && !isDashing && !hasDashed) {
             isDashing = true;
             dashTimeRemaining = dashDuration;
             dashDirection = 1; 
             timeSinceLastDash = 0f;
+            hasDashed = true; 
         }
     }
 
     public void fallFaster(float deltaTime) {
         if (isFalling || isJumping) {
             isJumping = false;
-            fallSpeed += gravity * deltaTime * 4; 
-            y -= fallSpeed * deltaTime; 
+    
+            fallSpeed += gravity * deltaTime * 4;
+    
+            float maxFallSpeed = 64f / deltaTime; 
+            fallSpeed = Math.min(fallSpeed, maxFallSpeed);
+    
+            y -= fallSpeed * deltaTime;
+    
+            updateHitbox();
         }
     }
 
@@ -701,4 +708,5 @@ public class Player {
             playerHitboxes[COLLIDING_RIGHT].height
         );
     }
+
 }

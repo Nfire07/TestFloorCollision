@@ -35,11 +35,13 @@ public class GameMainScreen implements Screen {
         viewport.apply();
         camera.position.set(camera.viewportWidth / 2, camera.viewportHeight / 2, 0);
 
-        player = new Player(new Rectangle(0, 100, 64, 64),Player.generateTextureFromAtlas("./assets/TileTest.png", 64, 64, 0),0.4f);
+        player = new Player(new Rectangle(0, 100, 64, 128),Player.generateTextureFromAtlas("./assets/PlayerAtlasSprite.png", 64, 128, 0),0.4f);
 
         tiles.add(new Tile(new Rectangle(100, 100, 64, 64),Tile.generateTextureFromAtlas("./assets/Blocco1.png", 64, 64, 0), 0.5f));
         tiles.add(new Tile(new Rectangle(600, 400, 64, 64),Tile.generateTextureFromAtlas("./assets/TileTest.png", 64, 64, 0), 0.5f));
         tiles.add(new Tile(new Rectangle(800, 600, 64, 64),Tile.generateTextureFromAtlas("./assets/TileTest.png", 64, 64, 0), 0.5f));
+        tiles.add(new Tile(new Rectangle(400, 400, 64, 64),Tile.generateTextureFromAtlas("./assets/NOT_EXISTING.png", 64, 64, 0), 0.5f));
+
 
         for (int i = 0; i <= 1920; i += 64) {
             tiles.add(new Tile(new Rectangle(i, 0, 64, 64),Tile.generateTextureFromAtlas("./assets/TileTest.png", 64, 64, 0), 0.5f));
@@ -48,10 +50,10 @@ public class GameMainScreen implements Screen {
         // player attributes
         player.setMovementSpeed(200f);
         player.setJumpHeight(300f);
-        player.setGravity(200f);
+        player.setGravity(230f);
         player.setDashDistance(400f);
         player.setDashDuration(0.4f);
-        player.setDashCooldown(2f);
+        player.setDashCooldown(0.5f);
 
 
 
@@ -95,7 +97,6 @@ public class GameMainScreen implements Screen {
         for (Tile tile : tiles) {
             tile.updateSprite(delta);
             tile.renderSprite(batch, Tile.LINEAR, true);
-            //tile.drawHitboxes(shapeRenderer);
         }
 
         Rectangle groundHitbox = player.getGroundHitbox(tiles);
