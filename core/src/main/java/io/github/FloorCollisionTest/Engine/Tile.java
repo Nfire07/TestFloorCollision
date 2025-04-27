@@ -225,8 +225,4 @@ public class Tile {
     public boolean isColliding(Rectangle hitbox, int typeOfCollision) {
         return tileHitboxes[typeOfCollision].overlaps(hitbox);
     }
-
-
-
-    
 }

@@ -114,15 +114,6 @@ public class Player {
             playerHitbox.height
         );
 
-        System.out.println("top hitbox starting postion "+playerHitboxes[COLLIDING_TOP].x+" "+playerHitboxes[COLLIDING_TOP].y);
-        System.out.println("top hitbox dimensions "+playerHitboxes[COLLIDING_TOP].width+" "+playerHitboxes[COLLIDING_TOP].height);
-        System.out.println("bottom hitbox starting postion "+playerHitboxes[COLLIDING_BOTTOM].x+" "+playerHitboxes[COLLIDING_BOTTOM].y);
-        System.out.println("bottom hitbox dimensions "+playerHitboxes[COLLIDING_BOTTOM].width+" "+playerHitboxes[COLLIDING_BOTTOM].height);
-        System.out.println("left hitbox starting postion "+playerHitboxes[COLLIDING_LEFT].x+" "+playerHitboxes[COLLIDING_LEFT].y);
-        System.out.println("left hitbox dimensions "+playerHitboxes[COLLIDING_LEFT].width+" "+playerHitboxes[COLLIDING_LEFT].height);
-        System.out.println("right hitbox starting postion "+playerHitboxes[COLLIDING_RIGHT].x+" "+playerHitboxes[COLLIDING_RIGHT].y);
-        System.out.println("right hitbox dimensions "+playerHitboxes[COLLIDING_RIGHT].width+" "+playerHitboxes[COLLIDING_RIGHT].height);
-
         return playerHitboxes;
     }
     // utility method to generate a texture from an atlas
@@ -411,7 +402,6 @@ public class Player {
         }
         return null;   
     }
-    
 
     /*
      0 = top
@@ -437,7 +427,7 @@ public class Player {
         playerHitboxes[COLLIDING_RIGHT].setPosition(x + getPlayerHitbox().width, y+4);
     }
 
-    public void updatePosition(float deltaTime, Rectangle groundHitbox, Rectangle topHitbox) {
+    public void updatePosition(float deltaTime, Rectangle groundHitbox, Rectangle topHitbox,Rectangle leftHitbox, Rectangle rightHitbox) {
         updateDash(deltaTime);
         if (isDashing) return;
     
@@ -448,6 +438,7 @@ public class Player {
 
 
         updateHitbox();
+        resolveCollisions(groundHitbox, topHitbox, leftHitbox, rightHitbox);
         updateSprite(deltaTime);
     }
 
@@ -503,6 +494,30 @@ public class Player {
     private void updateCooldown(float deltaTime) {
         if (timeSinceLastDash < dashCooldown) {
             timeSinceLastDash += deltaTime;
+        }
+    }
+
+    public void resolveCollisions(Rectangle groundHitbox, Rectangle topHitbox, Rectangle leftHitbox, Rectangle rightHitbox) {
+        if (groundHitbox!=null &&  isColliding(groundHitbox, COLLIDING_BOTTOM)) {
+            y = groundHitbox.y + groundHitbox.height;
+            fallSpeed = 0f; 
+            isFalling = false;
+            updateHitbox(); 
+        }
+        if (topHitbox!=null && isColliding(topHitbox, COLLIDING_TOP)) {
+            y = topHitbox.y - getPlayerHitbox().height;
+            jumpSpeed = 0f; 
+            isJumping = false;
+            isFalling = true;
+            updateHitbox(); 
+        }
+        if (leftHitbox!=null && isColliding(leftHitbox, COLLIDING_LEFT)) {
+            x = leftHitbox.x + leftHitbox.width;
+            updateHitbox(); 
+        }
+        if (rightHitbox!=null && isColliding(rightHitbox, COLLIDING_RIGHT)) {
+            x = rightHitbox.x - getPlayerHitbox().width;
+            updateHitbox(); 
         }
     }
 
@@ -709,4 +724,28 @@ public class Player {
         );
     }
 
+    public void drawAdiacentHitboxes(ArrayList<Tile> tiles,ShapeRenderer shapeRenderer) {
+        Rectangle groundHitbox = this.getGroundHitbox(tiles);
+        Rectangle topHitbox = this.getTopHitbox(tiles);
+        Rectangle leftHitbox = this.getLeftHitbox(tiles);
+        Rectangle rightHitbox = this.getRightHitbox(tiles);
+
+        
+        if(topHitbox != null) {
+            shapeRenderer.setColor(0, 1, 0, 1); // GREEN
+            shapeRenderer.rect(topHitbox.x, topHitbox.y, topHitbox.width, topHitbox.height);
+        }
+        if(leftHitbox != null) {
+            shapeRenderer.setColor(0, 0, 1, 1); // BLUE
+            shapeRenderer.rect(leftHitbox.x, leftHitbox.y, leftHitbox.width, leftHitbox.height);
+        }
+        if(rightHitbox != null) {
+            shapeRenderer.setColor(1, 1, 1, 1); // WHITE
+            shapeRenderer.rect(rightHitbox.x, rightHitbox.y, rightHitbox.width, rightHitbox.height);
+        }
+        if(groundHitbox != null) {
+            shapeRenderer.setColor(1, 0, 0, 1); // RED
+            shapeRenderer.rect(groundHitbox.x, groundHitbox.y, groundHitbox.width, groundHitbox.height);
+        }
+    }
 }
